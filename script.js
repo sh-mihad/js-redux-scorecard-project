@@ -1,6 +1,7 @@
 //select the element
 const matchContainer = document.getElementById("match-container");
 const addAnotherMatchEL = document.getElementById("add-match");
+const resetButtonEl = document.getElementById("reset")
 
 // action name
 const ADD_ANOTHER_MATCH = "addANotherMatch";
@@ -80,7 +81,7 @@ const scorecardReducer = (state = initialState, action) => {
       });
     case DECREMENT:
       return state.map((item) => {
-        if (item?.id === action.payload.id) {
+        if (item?.id === action.payload.id && item?.value >= action.payload.value) {
           return { ...item, value: item?.value - action.payload.value };
         } else {
           return item;
@@ -107,11 +108,11 @@ const render = () => {
             <h3 class="lws-matchName">Match ${item?.id}</h3>
           </div>
           <div class="inc-dec">
-            <form class="incrementForm">
+            <form id="increment-${item.id}" class="incrementForm">
               <h4>Increment</h4>
               <input type="number" name="increment" class="lws-increment" />
             </form>
-            <form class="decrementForm">
+            <form id="decrement-${item.id}" class="decrementForm">
               <h4>Decrement</h4>
               <input type="number" name="decrement" class="lws-decrement" />
             </form>
@@ -127,9 +128,21 @@ const render = () => {
 
   store.getState().forEach((item) => {
     const deleteButtonEl = document.getElementById(`delete-${item?.id}`);
+    const incrementEl = document.getElementById(`increment-${item.id}`)
+    const decrementEl = document.getElementById(`decrement-${item.id}`)
     deleteButtonEl.addEventListener("click", () => {
       store.dispatch(deleteMatchAction(item?.id));
     });
+    incrementEl.addEventListener("submit",(e)=>{
+      e.preventDefault()
+      const incrementValue = incrementEl.querySelector('input[name="increment"]').value;
+      store.dispatch(incrementAction(item.id,+incrementValue))
+    })
+    decrementEl.addEventListener("submit",(e)=>{
+      e.preventDefault()
+      const decrementValue = decrementEl.querySelector('input[name="decrement"]').value;
+      store.dispatch(decrementAction(item.id,+decrementValue))
+    })
   });
 };
 
@@ -139,4 +152,7 @@ render();
 
 addAnotherMatchEL.addEventListener("click", () => {
   store.dispatch(addAnotherAction());
+});
+resetButtonEl.addEventListener("click", () => {
+  store.dispatch(resetAction());
 });
